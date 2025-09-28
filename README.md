@@ -65,7 +65,7 @@ To get a local copy up and running, follow these steps.
 ### Prerequisites
 
 You must have the following software installed:
-* Go (version 1.21 or later)
+* Go (version 1.25.1 or later)
 * Docker and Docker Compose
 
 ### Installation & Running
