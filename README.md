@@ -4,6 +4,24 @@ A simple project built to learn the fundamentals of Prometheus by monitoring a c
 
 ---
 
+## Table of Contents
+
+- [Architecture](#architecture)
+- [Dashboard Preview](#dashboard-preview)
+- [Dashboard Configuration](#dashboard-configuration)
+- [Built With](#built-with)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation & Running](#installation--running)
+- [Setup](#setup)
+  - [Setting Up Prometheus](#setting-up-prometheus)
+  - [Setting Up Your Grafana Dashboard](#setting-up-your-grafana-dashboard)
+- [Usage](#usage)
+- [Troubleshooting](#troubleshooting)
+- [Project File Structure](#project-file-structure)
+
+---
+
 ## Architecture
 
 This diagram shows the complete monitoring flow from user interaction to real-time visualization. Each component serves a specific role in collecting, storing, and displaying metrics from the Go web application.
@@ -46,6 +64,20 @@ flowchart TD
 *This picture shows the final dashboard visualizing the rate of requests per second.*
 
 ![Grafana Dashboard](./images/grafana-dashboard.png)
+
+---
+
+## Dashboard Configuration
+
+**Setting up the Grafana Panel:**
+*This picture shows the configuration for tracking request rates using the `rate(http_requests_total[5m])` query.*
+
+![Grafana Configuration](./images/grafana-config.png)
+
+The query uses:
+- **Metric**: `http_requests_total`
+- **Operation**: `Rate` over a 5-minute range
+- **Visualization**: Time series chart
 
 ---
 
@@ -93,14 +125,57 @@ You must have the following software installed:
 
 ---
 
+## Setup
+
+### Setting Up Prometheus
+
+Prometheus is configured via the `prometheus.yml` file in your project root. Here's what you need to know:
+
+1. **Scrape Configuration:**
+   - **Target**: `host.docker.internal:8080` (your Go web server)
+   - **Scrape Interval**: 15 seconds (defined in global config)
+   - **Metrics Path**: `/metrics`
+
+2. **Verify Prometheus is Scraping:**
+   - Go to `http://localhost:9090/targets`
+   - Check that your Go app target shows as "UP"
+   - If it's down, verify your Go server is running
+
+3. **Query Metrics:**
+   - Navigate to `http://localhost:9090/graph`
+   - Try queries like `http_requests_total` or `rate(http_requests_total[5m])`
+   - Use the "Execute" button to see results
+
+### Setting Up Your Grafana Dashboard
+
+1. **Add Prometheus Data Source:**
+   - Navigate to Configuration → Data Sources
+   - Add Prometheus with URL: `http://prometheus:9090`
+   
+2. **Create a New Dashboard:**
+   - Click on "+" → Dashboard → Add new panel
+   - Select `prometheus-visit-metrics` as the data source
+
+3. **Configure the Query:**
+   - **Metric**: Select `http_requests_total`
+   - **Operation**: Choose `Rate` with a range of `5m`
+   - This creates the query: `rate(http_requests_total[5m])`
+
+4. **Customize the Panel:**
+   - Set visualization type to "Time series"
+   - Add a descriptive title like "HTTP Request Rate"
+   - Save the dashboard
+
+---
+
 ## Usage
 
-Once the stack is running, you can access the different components:
+Once everything is set up, you can use the monitoring stack:
 
-* **Go Web App:** Visit `http://localhost:8080` to generate traffic.
-* **App Metrics:** View the raw metrics at `http://localhost:8080/metrics`.
-* **Prometheus UI:** Access Prometheus at `http://localhost:9090`.
-* **Grafana Dashboard:** Access Grafana at `http://localhost:3000` (login: `admin`/`admin`).
+* **Go Web App:** Visit `http://localhost:8080` to generate traffic and create metrics data.
+* **App Metrics:** View the raw metrics at `http://localhost:8080/metrics` to see Prometheus-format data.
+* **Prometheus UI:** Access Prometheus at `http://localhost:9090` to query and explore metrics.
+* **Grafana Dashboard:** Access Grafana at `http://localhost:3000` to view your configured dashboards and visualizations.
 
 ---
 
@@ -125,6 +200,7 @@ The repository is organized as follows:
 ├── README.md
 ├── images/
 │   ├── grafana-dashboard.png
+│   ├── grafana-config.png
 │   └── prometheus-targets.png
 └── web-server/
     ├── go.mod
